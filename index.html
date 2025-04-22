@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reconhecimento de Objetos</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.2.0/tf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow-models/coco-ssd/2.2.2/coco-ssd.min.js"></script>
+    <!-- Bibliotecas corrigidas do TensorFlow.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/3.18.0/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2"></script>
     <style>
         * {
             margin: 0;
@@ -202,6 +203,24 @@
             border-radius: 12px;
             margin-top: 40px;
         }
+        
+        #error-message {
+            color: #ff6b6b;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+            text-align: center;
+            width: 100%;
+        }
+
+        .model-info {
+            margin-top: 10px;
+            font-size: 14px;
+            opacity: 0.8;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -212,9 +231,11 @@
         </div>
         
         <div class="camera-container">
-            <video id="video" autoplay playsinline></video>
+            <video id="video" autoplay muted playsinline></video>
             <canvas id="canvas"></canvas>
         </div>
+        
+        <div id="error-message"></div>
         
         <div class="controls">
             <button id="startBtn" class="active">Iniciar</button>
@@ -248,6 +269,8 @@
             <h2>Detecções Recentes</h2>
             <div id="detectionList" class="detection-list"></div>
         </div>
+        
+        <p class="model-info">Utilizando COCO-SSD para detecção de objetos</p>
     </div>
     
     <div id="no-camera">
@@ -258,10 +281,29 @@
     
     <div id="loading">
         <div class="spinner"></div>
-        <p>Carregando modelo de IA...</p>
+        <p id="loading-text">Carregando modelo de IA...</p>
     </div>
     
     <script>
+        // Elementos do DOM
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const personCount = document.getElementById('personCount');
+        const objectCount = document.getElementById('objectCount');
+        const fruitCount = document.getElementById('fruitCount');
+        const totalCount = document.getElementById('totalCount');
+        const status = document.getElementById('status');
+        const detectionList = document.getElementById('detectionList');
+        const loading = document.getElementById('loading');
+        const loadingText = document.getElementById('loading-text');
+        const noCamera = document.getElementById('no-camera');
+        const retryCamera = document.getElementById('retryCamera');
+        const errorMessage = document.getElementById('error-message');
+        
         // Categorias em português
         const categories = {
             'person': 'Pessoa',
@@ -349,23 +391,6 @@
         // Identificar frutas para estatísticas
         const fruits = ['banana', 'apple', 'orange'];
         
-        // Variáveis e elementos
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const startBtn = document.getElementById('startBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const captureBtn = document.getElementById('captureBtn');
-        const personCount = document.getElementById('personCount');
-        const objectCount = document.getElementById('objectCount');
-        const fruitCount = document.getElementById('fruitCount');
-        const totalCount = document.getElementById('totalCount');
-        const status = document.getElementById('status');
-        const detectionList = document.getElementById('detectionList');
-        const loading = document.getElementById('loading');
-        const noCamera = document.getElementById('no-camera');
-        const retryCamera = document.getElementById('retryCamera');
-        
         // Estado da aplicação
         let model;
         let isRunning = false;
@@ -379,19 +404,70 @@
         };
         let detectionHistory = [];
         
+        // Inicializar a aplicação
+        async function init() {
+            try {
+                loadingText.textContent = "Verificando TensorFlow.js...";
+                
+                // Verificar se TensorFlow.js está carregado
+                if (typeof tf === 'undefined') {
+                    throw new Error("TensorFlow.js não foi carregado corretamente.");
+                }
+                
+                loadingText.textContent = "Carregando modelo COCO-SSD...";
+                
+                // Verificar se o modelo COCO-SSD está disponível
+                if (typeof cocoSsd === 'undefined') {
+                    throw new Error("Modelo COCO-SSD não foi carregado corretamente.");
+                }
+                
+                // Carregar o modelo com tratamento de erro aprimorado
+                await loadModel();
+                
+            } catch (error) {
+                console.error("Erro na inicialização:", error);
+                handleInitError(error);
+            }
+        }
+        
+        // Tratar erros de inicialização
+        function handleInitError(error) {
+            loading.innerHTML = `
+                <p>Erro ao carregar recursos: ${error.message}</p>
+                <p>Por favor, verifique sua conexão com a internet.</p>
+                <button onclick="location.reload()" style="margin-top: 20px">Tentar novamente</button>
+            `;
+        }
+        
         // Carregar o modelo
         async function loadModel() {
             try {
-                model = await cocoSsd.load();
+                // Forçar download do modelo para garantir que ele esteja disponível
+                model = await cocoSsd.load({
+                    base: 'lite_mobilenet_v2'  // Modelo mais leve e rápido
+                });
+                
                 loading.style.display = 'none';
                 status.textContent = 'Modelo Carregado';
                 startCamera();
             } catch (error) {
                 console.error('Erro ao carregar modelo:', error);
-                loading.innerHTML = `
-                    <p>Erro ao carregar o modelo de IA</p>
-                    <button onclick="location.reload()" style="margin-top: 20px">Tentar novamente</button>
-                `;
+                loadingText.textContent = `Erro ao carregar o modelo: ${error.message}`;
+                
+                // Tentar usar um modelo alternativo se o primeiro falhar
+                try {
+                    loadingText.textContent = "Tentando modelo alternativo...";
+                    model = await cocoSsd.load();
+                    loading.style.display = 'none';
+                    status.textContent = 'Modelo Carregado';
+                    startCamera();
+                } catch (secondError) {
+                    loading.innerHTML = `
+                        <p>Não foi possível carregar o modelo de IA</p>
+                        <p>Erro: ${secondError.message}</p>
+                        <button onclick="location.reload()" style="margin-top: 20px">Tentar novamente</button>
+                    `;
+                }
             }
         }
         
@@ -406,6 +482,9 @@
                     }
                 };
                 
+                errorMessage.style.display = 'none';
+                status.textContent = 'Acessando câmera...';
+                
                 videoStream = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = videoStream;
                 
@@ -418,6 +497,8 @@
                 console.error('Erro ao acessar câmera:', error);
                 noCamera.style.display = 'block';
                 status.textContent = 'Sem acesso à câmera';
+                errorMessage.textContent = `Erro: ${error.message}`;
+                errorMessage.style.display = 'block';
             }
         }
         
@@ -476,10 +557,10 @@
         // Detectar objetos em um frame
         async function detectFrame() {
             if (isRunning) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
                 try {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    
                     const predictions = await model.detect(video);
                     
                     // Resetar contagens temporárias
@@ -523,7 +604,8 @@
                         ctx.fillText(`${translatedClass} ${(prediction.score * 100).toFixed(1)}%`, x + 5, y - 8);
                         
                         // Adicionar à história de detecções se for uma nova
-                        if (!detectionHistory.some(item => item.class === classname)) {
+                        const existingDetection = detectionHistory.findIndex(item => item.class === classname);
+                        if (existingDetection === -1) {
                             detectionHistory.unshift({
                                 class: classname,
                                 translatedClass: translatedClass,
@@ -544,12 +626,25 @@
                     stats = tempStats;
                     updateStats();
                     
+                    // Se não houver erros, limpar mensagem de erro
+                    errorMessage.style.display = 'none';
+                    
                 } catch (error) {
                     console.error('Erro na detecção:', error);
+                    errorMessage.textContent = `Erro na detecção: ${error.message}`;
+                    errorMessage.style.display = 'block';
+                    
+                    // Pausar detecção se ocorrer um erro persistente
+                    if (error.message.includes('model')) {
+                        pauseDetection();
+                        status.textContent = 'Erro no modelo';
+                    }
                 }
                 
                 // Continuar o loop de detecção
-                animationId = requestAnimationFrame(detectFrame);
+                if (isRunning) {
+                    animationId = requestAnimationFrame(detectFrame);
+                }
             }
         }
         
@@ -575,14 +670,27 @@
             });
         }
         
+        // Limpar recursos quando sair da página
+        window.addEventListener('beforeunload', () => {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        });
+        
         // Event listeners
         startBtn.addEventListener('click', startDetection);
         pauseBtn.addEventListener('click', pauseDetection);
         captureBtn.addEventListener('click', captureImage);
-        retryCamera.addEventListener('click', startCamera);
+        retryCamera.addEventListener('click', () => {
+            noCamera.style.display = 'none';
+            startCamera();
+        });
         
         // Inicializar a aplicação
-        window.onload = loadModel;
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
