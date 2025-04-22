@@ -319,16 +319,16 @@
                     <p id="personCount">0</p>
                 </div>
                 <div class="stat-item">
-                    <h3>Objetos</h3>
-                    <p id="objectCount">0</p>
+                    <h3>Eletrônicos</h3>
+                    <p id="electronicsCount">0</p>
                 </div>
                 <div class="stat-item">
-                    <h3>Frutas</h3>
-                    <p id="fruitCount">0</p>
+                    <h3>Frutas/Plantas</h3>
+                    <p id="fruitPlantCount">0</p>
                 </div>
                 <div class="stat-item">
-                    <h3>Total</h3>
-                    <p id="totalCount">0</p>
+                    <h3>Animais</h3>
+                    <p id="animalCount">0</p>
                 </div>
             </div>
         </div>
@@ -361,9 +361,9 @@
         const pauseBtn = document.getElementById('pauseBtn');
         const captureBtn = document.getElementById('captureBtn');
         const personCount = document.getElementById('personCount');
-        const objectCount = document.getElementById('objectCount');
-        const fruitCount = document.getElementById('fruitCount');
-        const totalCount = document.getElementById('totalCount');
+        const electronicsCount = document.getElementById('electronicsCount');
+        const fruitPlantCount = document.getElementById('fruitPlantCount');
+        const animalCount = document.getElementById('animalCount');
         const status = document.getElementById('status');
         const detectionList = document.getElementById('detectionList');
         const loading = document.getElementById('loading');
@@ -375,22 +375,20 @@
         const performanceMode = document.getElementById('performanceMode');
         const detectionInterval = document.getElementById('detectionInterval');
         
-        // Categorias em português
+        // PARTE MODIFICADA: Categorias simplificadas em português
         const categories = {
+            // Pessoas
             'person': 'Pessoa',
-            'bicycle': 'Bicicleta',
-            'car': 'Carro',
-            'motorcycle': 'Motocicleta',
-            'airplane': 'Avião',
-            'bus': 'Ônibus',
-            'train': 'Trem',
-            'truck': 'Caminhão',
-            'boat': 'Barco',
-            'traffic light': 'Semáforo',
-            'fire hydrant': 'Hidrante',
-            'stop sign': 'Placa de Pare',
-            'parking meter': 'Parquímetro',
-            'bench': 'Banco',
+            
+            // Eletrônicos
+            'cell phone': 'Celular',
+            'tv': 'TV',
+            'laptop': 'Notebook',
+            'remote': 'Controle Remoto',
+            'keyboard': 'Teclado',
+            'mouse': 'Mouse',
+            
+            // Animais
             'bird': 'Pássaro',
             'cat': 'Gato',
             'dog': 'Cachorro',
@@ -401,66 +399,20 @@
             'bear': 'Urso',
             'zebra': 'Zebra',
             'giraffe': 'Girafa',
-            'backpack': 'Mochila',
-            'umbrella': 'Guarda-chuva',
-            'handbag': 'Bolsa',
-            'tie': 'Gravata',
-            'suitcase': 'Mala',
-            'frisbee': 'Frisbee',
-            'skis': 'Esquis',
-            'snowboard': 'Snowboard',
-            'sports ball': 'Bola',
-            'kite': 'Pipa',
-            'baseball bat': 'Taco de Baseball',
-            'baseball glove': 'Luva de Baseball',
-            'skateboard': 'Skate',
-            'surfboard': 'Prancha de Surf',
-            'tennis racket': 'Raquete de Tênis',
-            'bottle': 'Garrafa',
-            'wine glass': 'Taça de Vinho',
-            'cup': 'Xícara',
-            'fork': 'Garfo',
-            'knife': 'Faca',
-            'spoon': 'Colher',
-            'bowl': 'Tigela',
+            
+            // Frutas e Plantas
             'banana': 'Banana',
             'apple': 'Maçã',
-            'sandwich': 'Sanduíche',
             'orange': 'Laranja',
             'broccoli': 'Brócolis',
             'carrot': 'Cenoura',
-            'hot dog': 'Cachorro-quente',
-            'pizza': 'Pizza',
-            'donut': 'Rosquinha',
-            'cake': 'Bolo',
-            'chair': 'Cadeira',
-            'couch': 'Sofá',
-            'potted plant': 'Planta',
-            'bed': 'Cama',
-            'dining table': 'Mesa de Jantar',
-            'toilet': 'Vaso Sanitário',
-            'tv': 'TV',
-            'laptop': 'Laptop',
-            'mouse': 'Mouse',
-            'remote': 'Controle Remoto',
-            'keyboard': 'Teclado',
-            'cell phone': 'Celular',
-            'microwave': 'Micro-ondas',
-            'oven': 'Forno',
-            'toaster': 'Torradeira',
-            'sink': 'Pia',
-            'refrigerator': 'Geladeira',
-            'book': 'Livro',
-            'clock': 'Relógio',
-            'vase': 'Vaso',
-            'scissors': 'Tesoura',
-            'teddy bear': 'Ursinho de Pelúcia',
-            'hair drier': 'Secador de Cabelo',
-            'toothbrush': 'Escova de Dentes'
+            'potted plant': 'Planta'
         };
         
-        // Identificar frutas para estatísticas
-        const fruits = ['banana', 'apple', 'orange'];
+        // Agrupar categorias para estatísticas
+        const electronics = ['cell phone', 'tv', 'laptop', 'remote', 'keyboard', 'mouse'];
+        const animals = ['bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe'];
+        const fruitPlants = ['banana', 'apple', 'orange', 'broccoli', 'carrot', 'potted plant'];
         
         // Estado da aplicação
         let model;
@@ -470,9 +422,9 @@
         let renderTimer;
         let stats = {
             person: 0,
-            objects: 0,
-            fruits: 0,
-            total: 0
+            electronics: 0,
+            animals: 0,
+            fruitPlants: 0
         };
         let detectionHistory = [];
         let lastPredictions = [];
@@ -781,23 +733,30 @@
                 // Resetar contagens temporárias
                 let tempStats = {
                     person: 0,
-                    objects: 0,
-                    fruits: 0,
-                    total: 0
+                    electronics: 0,
+                    animals: 0,
+                    fruitPlants: 0
                 };
                 
+                // Filtrar e processar apenas as categorias que nos interessam
+                const filteredPredictions = predictions.filter(prediction => {
+                    const classname = prediction.class;
+                    return categories.hasOwnProperty(classname);
+                });
+                
                 // Processar cada detecção para estatísticas e histórico
-                predictions.forEach((prediction) => {
+                filteredPredictions.forEach((prediction) => {
                     const classname = prediction.class;
                     
-                    // Atualizar estatísticas
-                    tempStats.total++;
+                    // Atualizar estatísticas com base nos grupos definidos
                     if (classname === 'person') {
                         tempStats.person++;
-                    } else if (fruits.includes(classname)) {
-                        tempStats.fruits++;
-                    } else {
-                        tempStats.objects++;
+                    } else if (electronics.includes(classname)) {
+                        tempStats.electronics++;
+                    } else if (animals.includes(classname)) {
+                        tempStats.animals++;
+                    } else if (fruitPlants.includes(classname)) {
+                        tempStats.fruitPlants++;
                     }
                     
                     // Traduzir classe
@@ -842,11 +801,15 @@
             ctx.lineWidth = currentSettings.lineWidth;
             ctx.font = `${currentSettings.fontSize} Arial`;
             
-            lastPredictions.forEach((prediction) => {
+            // Filtrar apenas categorias que nos interessam
+            const filteredPredictions = lastPredictions.filter(prediction => 
+                categories.hasOwnProperty(prediction.class)
+            );
+            
+            filteredPredictions.forEach((prediction) => {
                 const [x, y, width, height] = prediction.bbox;
                 const classname = prediction.class;
                 
-                // Calcular escala para posicionar corretamente no canvas
                 // Calcular escala para posicionar corretamente no canvas
                 const scaleX = canvas.width / video.videoWidth;
                 const scaleY = canvas.height / video.videoHeight;
@@ -893,180 +856,134 @@
                     status.textContent = 'Imagem capturada';
                     setTimeout(() => {
                         if (isRunning) {
-                            status.textContent = 'Detectando...';
-                        } else {
-                            status.textContent = 'Pausado';
-                        }
-                    }, 2000);
-                } catch (error) {
-                    console.error('Erro ao capturar imagem:', error);
-                    errorMessage.textContent = `Erro ao capturar: ${error.message}`;
-                    errorMessage.style.display = 'block';
-                }
+                            status.textContent = 'Detectando...';} else {
+            status.textContent = 'Pausado';
+        }
+    }, 2000);
+} catch (error) {
+    console.error('Erro ao capturar imagem:', error);
+    status.textContent = 'Erro ao capturar';
+    errorMessage.textContent = `Erro na captura: ${error.message}`;
+    errorMessage.style.display = 'block';
+}
+}
+}
+
+// Atualizar estatísticas na interface
+function updateStats() {
+    personCount.textContent = stats.person;
+    electronicsCount.textContent = stats.electronics;
+    animalCount.textContent = stats.animals;
+    fruitPlantCount.textContent = stats.fruitPlants;
+}
+
+// Atualizar a lista de detecções recentes
+function updateDetectionList() {
+    detectionList.innerHTML = '';
+    
+    if (detectionHistory.length === 0) {
+        detectionList.innerHTML = '<p style="opacity: 0.7; text-align: center;">Nenhuma detecção ainda</p>';
+        return;
+    }
+    
+    detectionHistory.forEach((detection) => {
+        const item = document.createElement('div');
+        item.className = 'detected-item';
+        item.innerHTML = `
+            <span>${detection.translatedClass}</span>
+            <span>${detection.time}</span>
+        `;
+        detectionList.appendChild(item);
+    });
+}
+
+// Configurar event listeners
+function setupEventListeners() {
+    startBtn.addEventListener('click', startDetection);
+    pauseBtn.addEventListener('click', pauseDetection);
+    captureBtn.addEventListener('click', captureImage);
+    retryCamera.addEventListener('click', startCamera);
+    
+    // Listener para mudança de intervalo de detecção
+    detectionInterval.addEventListener('change', function() {
+        // Reiniciar a detecção com o novo intervalo se estiver em execução
+        if (isRunning) {
+            clearTimeout(detectionTimer);
+            detectWithInterval();
+        }
+    });
+    
+    // Prevenir vazamentos de memória
+    window.addEventListener('beforeunload', () => {
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+        }
+        
+        if (detectionTimer) clearTimeout(detectionTimer);
+        if (renderTimer) cancelAnimationFrame(renderTimer);
+    });
+}
+
+// Verificar compatibilidade do navegador
+function checkBrowserCompatibility() {
+    // Verificar suporte à câmera
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        loading.innerHTML = `
+            <p>Seu navegador não suporta acesso à câmera.</p>
+            <p>Por favor, use um navegador moderno como Chrome, Firefox, Safari ou Edge.</p>
+        `;
+        return false;
+    }
+    
+    // Verificar suporte a WebGL para TensorFlow.js
+    try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (!gl) {
+            loading.innerHTML = `
+                <p>Seu dispositivo não suporta WebGL, necessário para o TensorFlow.js.</p>
+                <p>Por favor, tente usar um dispositivo mais recente.</p>
+            `;
+            return false;
+        }
+    } catch (e) {
+        loading.innerHTML = `
+            <p>Ocorreu um erro ao verificar o suporte a WebGL.</p>
+            <p>Erro: ${e.message}</p>
+        `;
+        return false;
+    }
+    
+    return true;
+}
+
+// Otimização de memória - liberar memória da GPU em intervalos regulares
+function scheduleMemoryCleanup() {
+    setInterval(() => {
+        if (tf) {
+            // Liberar tensores não utilizados
+            try {
+                tf.tidy(() => {});
+                console.log("Memória liberada");
+            } catch (e) {
+                console.warn("Erro ao limpar memória:", e);
             }
         }
-        
-        // Atualizar as estatísticas na interface
-        function updateStats() {
-            // Usar requestAnimationFrame para garantir que a atualização da interface
-            // seja feita no próximo frame de renderização
-            requestAnimationFrame(() => {
-                personCount.textContent = stats.person;
-                objectCount.textContent = stats.objects;
-                fruitCount.textContent = stats.fruits;
-                totalCount.textContent = stats.total;
-            });
-        }
-        
-        // Atualizar a lista de detecções
-        function updateDetectionList() {
-            // Usar requestAnimationFrame para otimizar a renderização da UI
-            requestAnimationFrame(() => {
-                // Criar um fragmento de documento para melhorar desempenho com múltiplas atualizações DOM
-                const fragment = document.createDocumentFragment();
-                
-                detectionHistory.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'detected-item';
-                    div.innerHTML = `
-                        <span>${item.translatedClass}</span>
-                        <span>${item.time}</span>
-                    `;
-                    fragment.appendChild(div);
-                });
-                
-                // Limpar e adicionar todo o conteúdo de uma vez
-                detectionList.innerHTML = '';
-                detectionList.appendChild(fragment);
-            });
-        }
-        
-        // Limpar recursos quando sair da página
-        function cleanupResources() {
-            // Parar detecção
-            isRunning = false;
-            
-            // Limpar timers
-            if (detectionTimer) clearTimeout(detectionTimer);
-            if (renderTimer) cancelAnimationFrame(renderTimer);
-            
-            // Parar câmera
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-            }
-            
-            // Liberar memória do TensorFlow.js
-            if (tf) {
-                try {
-                    tf.disposeVariables();
-                    tf.engine().endScope();
-                    tf.engine().disposeVariables();
-                } catch (e) {
-                    console.warn("Erro ao limpar memória TensorFlow:", e);
-                }
-            }
-        }
-        
-        // Adicionar event listener para limpar recursos ao sair
-        window.addEventListener('beforeunload', cleanupResources);
-        
-        // Event listeners
-        startBtn.addEventListener('click', startDetection);
-        pauseBtn.addEventListener('click', pauseDetection);
-        captureBtn.addEventListener('click', captureImage);
-        retryCamera.addEventListener('click', () => {
-            noCamera.style.display = 'none';
-            startCamera();
-        });
-        
-        // Listener para mudança de intervalo de detecção
-        detectionInterval.addEventListener('change', function() {
-            // Reiniciar detecção se estiver rodando
-            if (isRunning) {
-                if (detectionTimer) clearTimeout(detectionTimer);
-                detectWithInterval();
-            }
-        });
-        
-        // Função para lidar com visibilidade da página
-        function handleVisibilityChange() {
-            if (document.visibilityState === 'hidden') {
-                // Se a página estiver oculta, pausar para economizar recursos
-                if (isRunning) {
-                    pauseDetection();
-                    // Salvar o estado para retomar quando voltar
-                    document.wasRunning = true;
-                }
-            } else if (document.visibilityState === 'visible' && document.wasRunning) {
-                // Retomar quando voltar à página
-                startDetection();
-                document.wasRunning = false;
-            }
-        }
-        
-        // Adicionar event listener para visibilidade da página
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        
-        // Detectar quando o dispositivo está com pouca bateria
-        if ('getBattery' in navigator) {
-            navigator.getBattery().then(battery => {
-                function checkBattery() {
-                    if (battery.level < 0.15 && !battery.charging) {
-                        // Mudar para modo de baixo consumo
-                        if (performanceMode.value !== 'low') {
-                            performanceMode.value = 'low';
-                            performanceMode.dispatchEvent(new Event('change'));
-                            
-                            // Mostrar mensagem
-                            errorMessage.textContent = 'Modo de economia ativado (bateria baixa)';
-                            errorMessage.style.display = 'block';
-                            
-                            setTimeout(() => {
-                                errorMessage.style.display = 'none';
-                            }, 3000);
-                        }
-                    }
-                }
-                
-                battery.addEventListener('levelchange', checkBattery);
-                battery.addEventListener('chargingchange', checkBattery);
-                
-                // Verificar imediatamente
-                checkBattery();
-            });
-        }
-        
-        // Detectar tamanho da tela para ajustar configurações
-        function adjustForScreenSize() {
-            // Ajustar para telas pequenas automaticamente
-            if (window.innerWidth < 400) {
-                performanceMode.value = 'low';
-                currentSettings = performanceSettings.low;
-            }
-        }
-        
-        // Ajustar para tamanho de tela na inicialização
-        adjustForScreenSize();
-        
-        // Listener para orientação da tela
-        window.addEventListener('orientationchange', () => {
-            // Pequeno atraso para garantir que as dimensões tenham sido atualizadas
-            setTimeout(() => {
-                // Ajustar canvas para nova orientação
-                if (video.videoWidth) {
-                    const maxWidth = Math.min(video.videoWidth, currentSettings.resolution.width);
-                    const maxHeight = Math.min(video.videoHeight, currentSettings.resolution.height);
-                    
-                    const ratio = Math.min(maxWidth / video.videoWidth, maxHeight / video.videoHeight);
-                    
-                    canvas.width = video.videoWidth * ratio;
-                    canvas.height = video.videoHeight * ratio;
-                }
-            }, 300);
-        });
-        
-        // Inicializar a aplicação
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+    }, 30000); // A cada 30 segundos
+}
+
+// Iniciar
+if (checkBrowserCompatibility()) {
+    setupEventListeners();
+    scheduleMemoryCleanup();
+    init().catch(err => {
+        console.error("Erro fatal na inicialização:", err);
+        loading.innerHTML = `
+            <p>Erro ao inicializar a aplicação: ${err.message}</p>
+            <button onclick="location.reload()" style="margin-top: 20px">Tentar novamente</button>
+        `;
+    });
+}
+</script>
 </body>
 </html>
