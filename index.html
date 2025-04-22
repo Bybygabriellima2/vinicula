@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UvaVision - Análise de Cachos</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/opencv.js/4.5.5/opencv.js"></script>
+    
+    <style>
+        :root {
+            --primary: #6a1b9a;
+            --primary-light: #9c4dcc;
+            --secondary: #8bc34a;
+            --dark: #333;
+            --light: #f8f8f8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+        }
+        
+        .app-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border-radius: 15px 15px 0 0;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .camera-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 15px;
+            background-color: #000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        
+        #video {
+            width: 100%;
+            display: block;
+        }
+        
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+        }
+        
+        #photo {
+            display: none;
+            width: 100%;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        button:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button.secondary {
+            background-color: var(--secondary);
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .results {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-row:last-child {
+            border-bottom: none;
+        }
+        
+        .data-label {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .data-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .health-indicator {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .health-good {
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        .health-warning {
+            background-color: #ff9800;
+            color: white;
+        }
+        
+        .health-bad {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            padding: 20px 0;
+        }
+        
+        .branding {
+            display: block;
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            flex-direction: column;
+        }
+        
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        .loader-text {
+            color: white;
+            font-size: 18px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .analysis-tip {
+            background-color: #e1f5fe;
+            border-left: 4px solid #03a9f4;
+            padding: 10px 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>UvaVision</h1>
+            <p class="subtitle">Análise inteligente de cachos de uva</p>
+        </header>
+        
+        <div class="camera-container">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas"></canvas>
+            <img id="photo" alt="Imagem capturada">
+        </div>
+        
+        <div class="controls">
+            <button id="cameraBtn">Acessar câmera</button>
+            <button id="captureBtn" disabled>Capturar foto</button>
+            <button id="analyzeBtn" disabled class="secondary">Analisar</button>
+        </div>
+        
+        <div class="analysis-tip">
+            Para melhores resultados, posicione o cacho de uva contra um fundo contrastante e em boa iluminação.
+        </div>
+        
+        <div class="results hidden" id="resultsContainer">
+            <h2>Resultados da análise</h2>
+            
+            <div class="data-row">
+                <span class="data-label">Contagem de uvas:</span>
+                <span class="data-value" id="grapeCount">--</span>
+            </div>
+            
+            <div class="data-row">
+                <span class="data-label">Estimativa de peso:</span>
+                <span class="data-value" id="weightEstimate">--</span>
+            </div>
+            
+            <div class="data-row">
+                <span class="data-label">Qualidade geral:</span>
+                <span class="data-value" id="qualityStatus">--</span>
+            </div>
+            
+            <div class="data-row">
+                <span class="data-label">Problemas detectados:</span>
+                <span class="data-value" id="issues">--</span>
+            </div>
+            
+            <div class="data-row">
+                <span class="data-label">Confiança da análise:</span>
+                <span class="data-value" id="confidence">--</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="branding">By.BlancMind</div>
+    
+    <div class="loading hidden" id="loadingScreen">
+        <div class="loader"></div>
+        <div class="loader-text" id="loadingText">Carregando modelos de IA...</div>
+    </div>
+    
+    <script>
+        // Elementos DOM
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const photo = document.getElementById('photo');
+        const cameraBtn = document.getElementById('cameraBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const loadingScreen = document.getElementById('loadingScreen');
+        const loadingText = document.getElementById('loadingText');
+        
+        // Elementos de resultado
+        const grapeCount = document.getElementById('grapeCount');
+        const weightEstimate = document.getElementById('weightEstimate');
+        const qualityStatus = document.getElementById('qualityStatus');
+        const issues = document.getElementById('issues');
+        const confidence = document.getElementById('confidence');
+        
+        // Contexto do canvas
+        const ctx = canvas.getContext('2d');
+        
+        // Estado da aplicação
+        let stream = null;
+        let cocoModel = null;
+        let isModelLoaded = false;
+        let photoTaken = false;
+        
+        // Inicializar carregamento do modelo COCO SSD
+        async function loadAIModel() {
+            loadingScreen.classList.remove('hidden');
+            loadingText.textContent = 'Carregando modelos de IA...';
+            
+            try {
+                cocoModel = await cocoSsd.load();
+                isModelLoaded = true;
+                loadingText.textContent = 'Modelo carregado com sucesso!';
+                setTimeout(() => {
+                    loadingScreen.classList.add('hidden');
+                }, 1000);
+            } catch (error) {
+                console.error('Erro ao carregar o modelo:', error);
+                loadingText.textContent = 'Erro ao carregar modelos. Tente novamente.';
+                setTimeout(() => {
+                    loadingScreen.classList.add('hidden');
+                }, 3000);
+            }
+        }
+        
+        // Iniciar a câmera
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' },
+                    audio: false
+                });
+                
+                video.srcObject = stream;
+                captureBtn.disabled = false;
+                cameraBtn.textContent = 'Trocar câmera';
+                
+                // Ajustar dimensões
+                video.addEventListener('loadedmetadata', () => {
+                    const aspectRatio = video.videoWidth / video.videoHeight;
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                });
+                
+                if (!isModelLoaded) {
+                    loadAIModel();
+                }
+                
+            } catch (err) {
+                console.error('Erro ao acessar a câmera:', err);
+                alert('Não foi possível acessar a câmera. Verifique as permissões.');
+            }
+        }
+        
+        // Capturar foto
+        function capturePhoto() {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            photo.src = canvas.toDataURL('image/jpeg');
+            photoTaken = true;
+            analyzeBtn.disabled = false;
+        }
+        
+        // Processamento de imagem para segmentar uvas
+        async function processImage() {
+            if (!photoTaken || !isModelLoaded) return;
+            
+            loadingScreen.classList.remove('hidden');
+            loadingText.textContent = 'Analisando imagem...';
+            
+            try {
+                // Usar modelo COCO-SSD para detecção de objetos
+                const predictions = await cocoModel.detect(photo);
+                
+                // Simular detecção específica de uvas
+                // Em um app real, você teria um modelo treinado especificamente para uvas
+                let grapeDetections = simulateGrapeDetection(predictions);
+                
+                // Desenhar as detecções no canvas
+                drawDetections(grapeDetections);
+                
+                // Exibir resultados
+                displayResults(grapeDetections);
+                
+                resultsContainer.classList.remove('hidden');
+                loadingScreen.classList.add('hidden');
+                
+            } catch (error) {
+                console.error('Erro na análise:', error);
+                loadingText.textContent = 'Erro na análise. Tente novamente.';
+                setTimeout(() => {
+                    loadingScreen.classList.add('hidden');
+                }, 2000);
+            }
+        }
+        
+        // Função que simula a detecção de uvas
+        // Em um app real, isso seria um modelo ML treinado especificamente
+        function simulateGrapeDetection(predictions) {
+            // Número simulado de uvas (entre 30-120)
+            const numberOfGrapes = Math.floor(Math.random() * 90) + 30;
+            
+            // Qualidade simulada (0-1)
+            const qualityScore = Math.random();
+            
+            // Gerar clusters simulados de uvas
+            const clusters = [];
+            const clusterCount = Math.floor(Math.random() * 3) + 2; // 2-4 clusters
+            
+            for (let i = 0; i < clusterCount; i++) {
+                const centerX = Math.random() * (canvas.width - 100) + 50;
+                const centerY = Math.random() * (canvas.height - 100) + 50;
+                const clusterWidth = Math.random() * 100 + 50;
+                const clusterHeight = Math.random() * 100 + 50;
+                
+                clusters.push({
+                    x: centerX,
+                    y: centerY,
+                    width: clusterWidth,
+                    height: clusterHeight
+                });
+            }
+            
+            // Possíveis problemas
+            const possibleIssues = ['Nenhum', 'Fungo detectado', 'Uvas imaturas', 'Desidratação'];
+            const detectedIssues = qualityScore < 0.6 ? 
+                possibleIssues[Math.floor(Math.random() * (possibleIssues.length - 1)) + 1] : 
+                possibleIssues[0];
+            
+            return {
+                count: numberOfGrapes,
+                quality: qualityScore,
+                issues: detectedIssues,
+                clusters: clusters,
+                confidence: (Math.random() * 0.3) + 0.6 // 60-90% de confiança
+            };
+        }
+        
+        // Desenhar resultados no canvas
+        function drawDetections(grapeData) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(photo, 0, 0, canvas.width, canvas.height);
+            
+            // Desenhar clusters
+            grapeData.clusters.forEach(cluster => {
+                ctx.strokeStyle = 'rgba(106, 27, 154, 0.8)';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(cluster.x - cluster.width/2, cluster.y - cluster.height/2, 
+                              cluster.width, cluster.height);
+                
+                // Desenhar uvas simuladas dentro do cluster
+                const grapesInCluster = Math.floor(grapeData.count / grapeData.clusters.length);
+                for (let i = 0; i < grapesInCluster; i++) {
+                    const offsetX = (Math.random() - 0.5) * cluster.width * 0.8;
+                    const offsetY = (Math.random() - 0.5) * cluster.height * 0.8;
+                    
+                    ctx.beginPath();
+                    ctx.arc(cluster.x + offsetX, cluster.y + offsetY, 
+                           Math.random() * 3 + 2, 0, Math.PI * 2);
+                    ctx.fillStyle = grapeData.issues === 'Nenhum' ? 
+                                   'rgba(139, 195, 74, 0.7)' : 'rgba(255, 193, 7, 0.7)';
+                    ctx.fill();
+                }
+            });
+            
+            // Adicionar texto informativo
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fillRect(10, 10, 200, 30);
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#6a1b9a';
+            ctx.fillText(`Uvas detectadas: ${grapeData.count}`, 15, 30);
+        }
+        
+        // Exibir resultados na UI
+        function displayResults(grapeData) {
+            // Contagem de uvas
+            grapeCount.textContent = `${grapeData.count} uvas`;
+            
+            // Estimativa de peso (simulação baseada na contagem)
+            const estimatedWeight = (grapeData.count * 0.005 * (0.8 + (Math.random() * 0.4))).toFixed(2);
+            weightEstimate.textContent = `${estimatedWeight} kg`;
+            
+            // Qualidade
+            let qualityText, qualityClass;
+            if (grapeData.quality > 0.8) {
+                qualityText = "Excelente";
+                qualityClass = "health-good";
+            } else if (grapeData.quality > 0.6) {
+                qualityText = "Boa";
+                qualityClass = "health-good";
+            } else if (grapeData.quality > 0.4) {
+                qualityText = "Regular";
+                qualityClass = "health-warning";
+            } else {
+                qualityText = "Atenção necessária";
+                qualityClass = "health-bad";
+            }
+            
+            qualityStatus.innerHTML = `<span class="${qualityClass}">${qualityText}</span>`;
+            
+            // Problemas detectados
+            issues.textContent = grapeData.issues;
+            
+            // Confiança
+            confidence.textContent = `${Math.round(grapeData.confidence * 100)}%`;
+        }
+        
+        // Event listeners
+        cameraBtn.addEventListener('click', startCamera);
+        captureBtn.addEventListener('click', capturePhoto);
+        analyzeBtn.addEventListener('click', processImage);
+        
+        // Verificar suporte à câmera
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('Seu navegador não suporta acesso à câmera. Por favor, use um navegador mais recente.');
+            cameraBtn.disabled = true;
+        }
+    </script>
+</body>
+</html>
