@@ -27,15 +27,15 @@
         .container {
             width: 100%;
             max-width: 500px;
-            padding: 20px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
         
         h1 {
-            margin: 20px 0;
-            font-size: 24px;
+            margin: 10px 0;
+            font-size: 22px;
             font-weight: 600;
             text-align: center;
         }
@@ -53,6 +53,7 @@
             width: 100%;
             height: auto;
             display: block;
+            background-color: #111;
         }
         
         #canvas {
@@ -65,20 +66,20 @@
         
         .controls {
             width: 100%;
-            margin: 20px 0;
+            margin: 15px 0;
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
         }
         
         button {
             background: rgba(255, 255, 255, 0.2);
             color: white;
             border: none;
-            padding: 12px 20px;
+            padding: 10px 15px;
             border-radius: 50px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 500;
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
@@ -96,38 +97,38 @@
         .stats {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 12px;
-            padding: 15px;
+            padding: 12px;
             width: 100%;
-            margin-top: 20px;
+            margin-top: 10px;
             backdrop-filter: blur(10px);
         }
         
         .stats h2 {
-            font-size: 18px;
-            margin-bottom: 10px;
+            font-size: 16px;
+            margin-bottom: 8px;
         }
         
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            gap: 8px;
         }
         
         .stat-item {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            padding: 10px;
+            padding: 8px;
             text-align: center;
         }
         
         .stat-item h3 {
-            font-size: 14px;
-            margin-bottom: 5px;
+            font-size: 13px;
+            margin-bottom: 4px;
             opacity: 0.8;
         }
         
         .stat-item p {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
         }
         
@@ -147,13 +148,13 @@
         }
         
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 255, 255, 0.3);
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         @keyframes spin {
@@ -165,61 +166,106 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 20px;
+            padding: 8px 15px;
             background: rgba(0, 0, 0, 0.2);
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             border-radius: 12px;
         }
         
         .logo {
             font-weight: bold;
-            font-size: 20px;
+            font-size: 18px;
         }
 
         .detected-item {
             display: flex;
             justify-content: space-between;
             background: rgba(255, 255, 255, 0.1);
-            padding: 8px 15px;
+            padding: 6px 12px;
             border-radius: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         
         .recent-detections {
             width: 100%;
-            margin-top: 20px;
+            margin-top: 15px;
         }
         
         .detection-list {
-            max-height: 200px;
+            max-height: 150px;
             overflow-y: auto;
         }
         
         #no-camera {
             display: none;
-            padding: 40px 20px;
+            padding: 30px 15px;
             text-align: center;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 12px;
-            margin-top: 40px;
+            margin-top: 30px;
         }
         
         #error-message {
             color: #ff6b6b;
             background: rgba(0, 0, 0, 0.5);
-            padding: 10px;
+            padding: 8px;
             border-radius: 8px;
-            margin-top: 10px;
+            margin-top: 8px;
             display: none;
             text-align: center;
             width: 100%;
         }
 
         .model-info {
-            margin-top: 10px;
-            font-size: 14px;
+            margin-top: 8px;
+            font-size: 12px;
             opacity: 0.8;
             text-align: center;
+        }
+        
+        .settings {
+            width: 100%;
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 10px;
+        }
+        
+        .settings h2 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .setting-item label {
+            font-size: 14px;
+        }
+        
+        select, input {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 4px;
+            padding: 5px;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .fps-display {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 10;
         }
     </style>
 </head>
@@ -233,6 +279,7 @@
         <div class="camera-container">
             <video id="video" autoplay muted playsinline></video>
             <canvas id="canvas"></canvas>
+            <div id="fps" class="fps-display">0 FPS</div>
         </div>
         
         <div id="error-message"></div>
@@ -241,6 +288,27 @@
             <button id="startBtn" class="active">Iniciar</button>
             <button id="pauseBtn">Pausar</button>
             <button id="captureBtn">Capturar</button>
+        </div>
+        
+        <div class="settings">
+            <h2>Configurações</h2>
+            <div class="setting-item">
+                <label for="performanceMode">Modo:</label>
+                <select id="performanceMode">
+                    <option value="low">Desempenho</option>
+                    <option value="medium" selected>Equilibrado</option>
+                    <option value="high">Qualidade</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <label for="detectionInterval">Intervalo de detecção (ms):</label>
+                <select id="detectionInterval">
+                    <option value="100">100 (Rápido/Alto consumo)</option>
+                    <option value="250" selected>250 (Recomendado)</option>
+                    <option value="500">500 (Econômico)</option>
+                    <option value="1000">1000 (Bateria fraca)</option>
+                </select>
+            </div>
         </div>
         
         <div class="stats">
@@ -288,7 +356,7 @@
         // Elementos do DOM
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { alpha: false });
         const startBtn = document.getElementById('startBtn');
         const pauseBtn = document.getElementById('pauseBtn');
         const captureBtn = document.getElementById('captureBtn');
@@ -303,6 +371,9 @@
         const noCamera = document.getElementById('no-camera');
         const retryCamera = document.getElementById('retryCamera');
         const errorMessage = document.getElementById('error-message');
+        const fpsDisplay = document.getElementById('fps');
+        const performanceMode = document.getElementById('performanceMode');
+        const detectionInterval = document.getElementById('detectionInterval');
         
         // Categorias em português
         const categories = {
@@ -395,7 +466,8 @@
         let model;
         let isRunning = false;
         let videoStream;
-        let animationId;
+        let detectionTimer;
+        let renderTimer;
         let stats = {
             person: 0,
             objects: 0,
@@ -403,16 +475,65 @@
             total: 0
         };
         let detectionHistory = [];
+        let lastPredictions = [];
+        let lastDrawTime = 0;
+        let frameCount = 0;
+        let lastFpsUpdate = 0;
+        let currentFps = 0;
+        
+        // Configurações de desempenho
+        const performanceSettings = {
+            low: {
+                resolution: { width: 320, height: 240 },
+                scoreThreshold: 0.5,
+                maxDetections: 5,
+                lineWidth: 2,
+                fontSize: '12px'
+            },
+            medium: {
+                resolution: { width: 640, height: 480 },
+                scoreThreshold: 0.4,
+                maxDetections: 10,
+                lineWidth: 3,
+                fontSize: '14px'
+            },
+            high: {
+                resolution: { width: 1280, height: 720 },
+                scoreThreshold: 0.3,
+                maxDetections: 20,
+                lineWidth: 4,
+                fontSize: '16px'
+            }
+        };
+        
+        let currentSettings = performanceSettings.medium;
         
         // Inicializar a aplicação
         async function init() {
             try {
+                // Definir configurações iniciais do Canvas para melhor desempenho
+                ctx.imageSmoothingEnabled = false;
+                
                 loadingText.textContent = "Verificando TensorFlow.js...";
                 
                 // Verificar se TensorFlow.js está carregado
                 if (typeof tf === 'undefined') {
                     throw new Error("TensorFlow.js não foi carregado corretamente.");
                 }
+                
+                // Configurar TensorFlow.js para melhor desempenho em dispositivos móveis
+                if (tf.getBackend() !== 'webgl') {
+                    try {
+                        await tf.setBackend('webgl');
+                        console.log("WebGL backend inicializado com sucesso");
+                    } catch (e) {
+                        console.warn("Não foi possível usar WebGL, usando fallback:", e);
+                    }
+                }
+                
+                // Configurações para economizar memória
+                tf.env().set('WEBGL_FORCE_F16_TEXTURES', true);
+                tf.env().set('WEBGL_PACK', true);
                 
                 loadingText.textContent = "Carregando modelo COCO-SSD...";
                 
@@ -424,10 +545,26 @@
                 // Carregar o modelo com tratamento de erro aprimorado
                 await loadModel();
                 
+                // Configurar listeners para configurações
+                setupConfigListeners();
+                
             } catch (error) {
                 console.error("Erro na inicialização:", error);
                 handleInitError(error);
             }
+        }
+        
+        // Configurar listeners para opções de desempenho
+        function setupConfigListeners() {
+            performanceMode.addEventListener('change', function() {
+                currentSettings = performanceSettings[this.value];
+                
+                // Reiniciar câmera com novas configurações
+                if (videoStream) {
+                    videoStream.getTracks().forEach(track => track.stop());
+                    startCamera();
+                }
+            });
         }
         
         // Tratar erros de inicialização
@@ -442,10 +579,22 @@
         // Carregar o modelo
         async function loadModel() {
             try {
-                // Forçar download do modelo para garantir que ele esteja disponível
+                // Desativar temporariamente eager execution para aumentar performance
+                const oldFlag = tf.ENV.get('EAGER_MODE');
+                tf.ENV.set('EAGER_MODE', false);
+                
+                // Forçar download do modelo mais leve
                 model = await cocoSsd.load({
                     base: 'lite_mobilenet_v2'  // Modelo mais leve e rápido
                 });
+                
+                // Restaurar configuração original
+                tf.ENV.set('EAGER_MODE', oldFlag);
+                
+                // Aquecer o modelo com uma previsão para acelerar a primeira detecção real
+                const warmupTensor = tf.zeros([300, 300, 3]);
+                await model.detect(warmupTensor);
+                warmupTensor.dispose();
                 
                 loading.style.display = 'none';
                 status.textContent = 'Modelo Carregado';
@@ -474,11 +623,16 @@
         // Iniciar a câmera
         async function startCamera() {
             try {
+                // Parar qualquer stream anterior
+                if (videoStream) {
+                    videoStream.getTracks().forEach(track => track.stop());
+                }
+                
                 const constraints = {
                     video: {
                         facingMode: 'environment',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
+                        width: { ideal: currentSettings.resolution.width },
+                        height: { ideal: currentSettings.resolution.height }
                     }
                 };
                 
@@ -489,8 +643,17 @@
                 video.srcObject = videoStream;
                 
                 video.onloadedmetadata = () => {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
+                    // Ajustar o tamanho do canvas para corresponder ao vídeo
+                    // mas limitar a uma resolução máxima para desempenho
+                    const maxWidth = Math.min(video.videoWidth, currentSettings.resolution.width);
+                    const maxHeight = Math.min(video.videoHeight, currentSettings.resolution.height);
+                    
+                    // Calcular proporção para manter aspect ratio
+                    const ratio = Math.min(maxWidth / video.videoWidth, maxHeight / video.videoHeight);
+                    
+                    canvas.width = video.videoWidth * ratio;
+                    canvas.height = video.videoHeight * ratio;
+                    
                     startDetection();
                 };
             } catch (error) {
@@ -509,8 +672,84 @@
                 startBtn.classList.add('active');
                 pauseBtn.classList.remove('active');
                 status.textContent = 'Detectando...';
-                detectFrame();
+                
+                // Iniciar loop de renderização separado do loop de detecção
+                startRenderLoop();
+                
+                // Iniciar detecção com intervalo configurado
+                detectWithInterval();
             }
+        }
+        
+        // Loop de renderização (executa a cada frame)
+        function startRenderLoop() {
+            // Limpar timer anterior se existir
+            if (renderTimer) cancelAnimationFrame(renderTimer);
+            
+            const render = () => {
+                if (!isRunning) return;
+                
+                const now = performance.now();
+                
+                // Calcular FPS a cada segundo
+                frameCount++;
+                if (now - lastFpsUpdate > 1000) {
+                    currentFps = Math.round((frameCount * 1000) / (now - lastFpsUpdate));
+                    fpsDisplay.textContent = `${currentFps} FPS`;
+                    frameCount = 0;
+                    lastFpsUpdate = now;
+                }
+                
+                // Desenhar o vídeo
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Desenhar detecções
+                drawPredictions();
+                
+                // Continuar loop
+                renderTimer = requestAnimationFrame(render);
+            };
+            
+            // Iniciar loop de renderização
+            lastFpsUpdate = performance.now();
+            frameCount = 0;
+            renderTimer = requestAnimationFrame(render);
+        }
+        
+        // Detecção com intervalo para economizar recursos
+        function detectWithInterval() {
+            // Limpar timer anterior se existir
+            if (detectionTimer) clearTimeout(detectionTimer);
+            
+            // Função para executar detecção periodicamente
+            const runDetection = async () => {
+                if (!isRunning) return;
+                
+                try {
+                    await detectObjects();
+                } catch (error) {
+                    console.error('Erro na detecção:', error);
+                    showError(error);
+                }
+                
+                // Programar próxima detecção
+                const interval = parseInt(detectionInterval.value);
+                detectionTimer = setTimeout(runDetection, interval);
+            };
+            
+            // Iniciar detecção imediatamente
+            runDetection();
+        }
+        
+        // Mostrar erro
+        function showError(error) {
+            errorMessage.textContent = `Erro: ${error.message}`;
+            errorMessage.style.display = 'block';
+            
+            // Ocultar após 5 segundos
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
         }
         
         // Pausar detecção
@@ -520,165 +759,216 @@
                 startBtn.classList.remove('active');
                 pauseBtn.classList.add('active');
                 status.textContent = 'Pausado';
-                cancelAnimationFrame(animationId);
+                
+                // Limpar timers
+                if (detectionTimer) clearTimeout(detectionTimer);
+                if (renderTimer) cancelAnimationFrame(renderTimer);
             }
+        }
+        
+        // Função para detectar objetos
+        async function detectObjects() {
+            try {
+                // Usar um threshold de confiança para filtrar detecções de baixa confiança
+                // e limitar o número máximo de detecções para melhorar o desempenho
+                const predictions = await model.detect(video, 
+                    currentSettings.maxDetections, 
+                    currentSettings.scoreThreshold);
+                
+                // Cache das previsões para desenho
+                lastPredictions = predictions;
+                
+                // Resetar contagens temporárias
+                let tempStats = {
+                    person: 0,
+                    objects: 0,
+                    fruits: 0,
+                    total: 0
+                };
+                
+                // Processar cada detecção para estatísticas e histórico
+                predictions.forEach((prediction) => {
+                    const classname = prediction.class;
+                    
+                    // Atualizar estatísticas
+                    tempStats.total++;
+                    if (classname === 'person') {
+                        tempStats.person++;
+                    } else if (fruits.includes(classname)) {
+                        tempStats.fruits++;
+                    } else {
+                        tempStats.objects++;
+                    }
+                    
+                    // Traduzir classe
+                    const translatedClass = categories[classname] || classname;
+                    
+                    // Adicionar à história de detecções se for uma nova
+                    const existingDetection = detectionHistory.findIndex(item => item.class === classname);
+                    if (existingDetection === -1) {
+                        detectionHistory.unshift({
+                            class: classname,
+                            translatedClass: translatedClass,
+                            time: new Date().toLocaleTimeString()
+                        });
+                        
+                        // Manter histórico com no máximo 10 detecções
+                        if (detectionHistory.length > 10) {
+                            detectionHistory.pop();
+                        }
+                        
+                        // Atualizar a lista de detecções
+                        updateDetectionList();
+                    }
+                });
+                
+                // Atualizar estatísticas
+                stats = tempStats;
+                updateStats();
+                
+                // Se não houver erros, limpar mensagem de erro
+                errorMessage.style.display = 'none';
+                
+            } catch (error) {
+                throw error;
+            }
+        }
+        
+        // Desenhar as previsões no canvas
+        function drawPredictions() {
+            if (!lastPredictions || lastPredictions.length === 0) return;
+            
+            // Usar configurações baseadas no modo de desempenho
+            ctx.lineWidth = currentSettings.lineWidth;
+            ctx.font = `${currentSettings.fontSize} Arial`;
+            
+            lastPredictions.forEach((prediction) => {
+                const [x, y, width, height] = prediction.bbox;
+                const classname = prediction.class;
+                
+                // Calcular escala para posicionar corretamente no canvas
+                // Calcular escala para posicionar corretamente no canvas
+                const scaleX = canvas.width / video.videoWidth;
+                const scaleY = canvas.height / video.videoHeight;
+                
+                // Posições escaladas
+                const scaledX = x * scaleX;
+                const scaledY = y * scaleY;
+                const scaledWidth = width * scaleX;
+                const scaledHeight = height * scaleY;
+                
+                // Traduzir classe
+                const translatedClass = categories[classname] || classname;
+                
+                // Estilizar caixa delimitadora
+                ctx.strokeStyle = '#4CAF50';
+                ctx.strokeRect(scaledX, scaledY, scaledWidth, scaledHeight);
+                
+                // Fundo da etiqueta - altura otimizada para texto menor
+                const labelHeight = parseInt(currentSettings.fontSize) + 10;
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                ctx.fillRect(scaledX, scaledY - labelHeight, scaledWidth, labelHeight);
+                
+                // Texto da etiqueta - texto simplificado para melhor desempenho
+                ctx.fillStyle = 'white';
+                ctx.fillText(
+                    `${translatedClass} ${(prediction.score * 100).toFixed(0)}%`, 
+                    scaledX + 5, 
+                    scaledY - 5
+                );
+            });
         }
         
         // Capturar imagem atual
         function captureImage() {
             if (videoStream) {
-                // Criar um canvas temporário para a captura
-                const captureCanvas = document.createElement('canvas');
-                captureCanvas.width = video.videoWidth;
-                captureCanvas.height = video.videoHeight;
-                const captureContext = captureCanvas.getContext('2d');
-                
-                // Desenhar o frame atual do vídeo
-                captureContext.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
-                
-                // Converter para imagem e baixar
-                const image = captureCanvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                link.href = image;
-                link.download = `deteccao-${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.png`;
-                link.click();
-                
-                status.textContent = 'Imagem capturada';
-                setTimeout(() => {
-                    if (isRunning) {
-                        status.textContent = 'Detectando...';
-                    } else {
-                        status.textContent = 'Pausado';
-                    }
-                }, 2000);
-            }
-        }
-        
-        // Detectar objetos em um frame
-        async function detectFrame() {
-            if (isRunning) {
                 try {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    // Usar o canvas atual diretamente para a captura
+                    const image = canvas.toDataURL('image/jpeg', 0.8); // Usar JPEG com 80% de qualidade para arquivos menores
+                    const link = document.createElement('a');
+                    link.href = image;
+                    link.download = `deteccao-${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.jpg`;
+                    link.click();
                     
-                    const predictions = await model.detect(video);
-                    
-                    // Resetar contagens temporárias
-                    let tempStats = {
-                        person: 0,
-                        objects: 0,
-                        fruits: 0,
-                        total: 0
-                    };
-                    
-                    // Processar cada detecção
-                    predictions.forEach((prediction) => {
-                        const [x, y, width, height] = prediction.bbox;
-                        const classname = prediction.class;
-                        
-                        // Traduzir classe
-                        const translatedClass = categories[classname] || classname;
-                        
-                        // Atualizar estatísticas
-                        tempStats.total++;
-                        if (classname === 'person') {
-                            tempStats.person++;
-                        } else if (fruits.includes(classname)) {
-                            tempStats.fruits++;
+                    status.textContent = 'Imagem capturada';
+                    setTimeout(() => {
+                        if (isRunning) {
+                            status.textContent = 'Detectando...';
                         } else {
-                            tempStats.objects++;
+                            status.textContent = 'Pausado';
                         }
-                        
-                        // Estilizar caixa delimitadora
-                        ctx.strokeStyle = '#4CAF50';
-                        ctx.lineWidth = 4;
-                        ctx.strokeRect(x, y, width, height);
-                        
-                        // Fundo da etiqueta
-                        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-                        ctx.fillRect(x, y - 30, width, 30);
-                        
-                        // Texto da etiqueta
-                        ctx.fillStyle = 'white';
-                        ctx.font = '18px Arial';
-                        ctx.fillText(`${translatedClass} ${(prediction.score * 100).toFixed(1)}%`, x + 5, y - 8);
-                        
-                        // Adicionar à história de detecções se for uma nova
-                        const existingDetection = detectionHistory.findIndex(item => item.class === classname);
-                        if (existingDetection === -1) {
-                            detectionHistory.unshift({
-                                class: classname,
-                                translatedClass: translatedClass,
-                                time: new Date().toLocaleTimeString()
-                            });
-                            
-                            // Manter histórico com no máximo 10 detecções
-                            if (detectionHistory.length > 10) {
-                                detectionHistory.pop();
-                            }
-                            
-                            // Atualizar a lista de detecções
-                            updateDetectionList();
-                        }
-                    });
-                    
-                    // Atualizar estatísticas
-                    stats = tempStats;
-                    updateStats();
-                    
-                    // Se não houver erros, limpar mensagem de erro
-                    errorMessage.style.display = 'none';
-                    
+                    }, 2000);
                 } catch (error) {
-                    console.error('Erro na detecção:', error);
-                    errorMessage.textContent = `Erro na detecção: ${error.message}`;
+                    console.error('Erro ao capturar imagem:', error);
+                    errorMessage.textContent = `Erro ao capturar: ${error.message}`;
                     errorMessage.style.display = 'block';
-                    
-                    // Pausar detecção se ocorrer um erro persistente
-                    if (error.message.includes('model')) {
-                        pauseDetection();
-                        status.textContent = 'Erro no modelo';
-                    }
-                }
-                
-                // Continuar o loop de detecção
-                if (isRunning) {
-                    animationId = requestAnimationFrame(detectFrame);
                 }
             }
         }
         
         // Atualizar as estatísticas na interface
         function updateStats() {
-            personCount.textContent = stats.person;
-            objectCount.textContent = stats.objects;
-            fruitCount.textContent = stats.fruits;
-            totalCount.textContent = stats.total;
+            // Usar requestAnimationFrame para garantir que a atualização da interface
+            // seja feita no próximo frame de renderização
+            requestAnimationFrame(() => {
+                personCount.textContent = stats.person;
+                objectCount.textContent = stats.objects;
+                fruitCount.textContent = stats.fruits;
+                totalCount.textContent = stats.total;
+            });
         }
         
         // Atualizar a lista de detecções
         function updateDetectionList() {
-            detectionList.innerHTML = '';
-            detectionHistory.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'detected-item';
-                div.innerHTML = `
-                    <span>${item.translatedClass}</span>
-                    <span>${item.time}</span>
-                `;
-                detectionList.appendChild(div);
+            // Usar requestAnimationFrame para otimizar a renderização da UI
+            requestAnimationFrame(() => {
+                // Criar um fragmento de documento para melhorar desempenho com múltiplas atualizações DOM
+                const fragment = document.createDocumentFragment();
+                
+                detectionHistory.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'detected-item';
+                    div.innerHTML = `
+                        <span>${item.translatedClass}</span>
+                        <span>${item.time}</span>
+                    `;
+                    fragment.appendChild(div);
+                });
+                
+                // Limpar e adicionar todo o conteúdo de uma vez
+                detectionList.innerHTML = '';
+                detectionList.appendChild(fragment);
             });
         }
         
         // Limpar recursos quando sair da página
-        window.addEventListener('beforeunload', () => {
+        function cleanupResources() {
+            // Parar detecção
+            isRunning = false;
+            
+            // Limpar timers
+            if (detectionTimer) clearTimeout(detectionTimer);
+            if (renderTimer) cancelAnimationFrame(renderTimer);
+            
+            // Parar câmera
             if (videoStream) {
                 videoStream.getTracks().forEach(track => track.stop());
             }
-            if (animationId) {
-                cancelAnimationFrame(animationId);
+            
+            // Liberar memória do TensorFlow.js
+            if (tf) {
+                try {
+                    tf.disposeVariables();
+                    tf.engine().endScope();
+                    tf.engine().disposeVariables();
+                } catch (e) {
+                    console.warn("Erro ao limpar memória TensorFlow:", e);
+                }
             }
-        });
+        }
+        
+        // Adicionar event listener para limpar recursos ao sair
+        window.addEventListener('beforeunload', cleanupResources);
         
         // Event listeners
         startBtn.addEventListener('click', startDetection);
@@ -687,6 +977,92 @@
         retryCamera.addEventListener('click', () => {
             noCamera.style.display = 'none';
             startCamera();
+        });
+        
+        // Listener para mudança de intervalo de detecção
+        detectionInterval.addEventListener('change', function() {
+            // Reiniciar detecção se estiver rodando
+            if (isRunning) {
+                if (detectionTimer) clearTimeout(detectionTimer);
+                detectWithInterval();
+            }
+        });
+        
+        // Função para lidar com visibilidade da página
+        function handleVisibilityChange() {
+            if (document.visibilityState === 'hidden') {
+                // Se a página estiver oculta, pausar para economizar recursos
+                if (isRunning) {
+                    pauseDetection();
+                    // Salvar o estado para retomar quando voltar
+                    document.wasRunning = true;
+                }
+            } else if (document.visibilityState === 'visible' && document.wasRunning) {
+                // Retomar quando voltar à página
+                startDetection();
+                document.wasRunning = false;
+            }
+        }
+        
+        // Adicionar event listener para visibilidade da página
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        
+        // Detectar quando o dispositivo está com pouca bateria
+        if ('getBattery' in navigator) {
+            navigator.getBattery().then(battery => {
+                function checkBattery() {
+                    if (battery.level < 0.15 && !battery.charging) {
+                        // Mudar para modo de baixo consumo
+                        if (performanceMode.value !== 'low') {
+                            performanceMode.value = 'low';
+                            performanceMode.dispatchEvent(new Event('change'));
+                            
+                            // Mostrar mensagem
+                            errorMessage.textContent = 'Modo de economia ativado (bateria baixa)';
+                            errorMessage.style.display = 'block';
+                            
+                            setTimeout(() => {
+                                errorMessage.style.display = 'none';
+                            }, 3000);
+                        }
+                    }
+                }
+                
+                battery.addEventListener('levelchange', checkBattery);
+                battery.addEventListener('chargingchange', checkBattery);
+                
+                // Verificar imediatamente
+                checkBattery();
+            });
+        }
+        
+        // Detectar tamanho da tela para ajustar configurações
+        function adjustForScreenSize() {
+            // Ajustar para telas pequenas automaticamente
+            if (window.innerWidth < 400) {
+                performanceMode.value = 'low';
+                currentSettings = performanceSettings.low;
+            }
+        }
+        
+        // Ajustar para tamanho de tela na inicialização
+        adjustForScreenSize();
+        
+        // Listener para orientação da tela
+        window.addEventListener('orientationchange', () => {
+            // Pequeno atraso para garantir que as dimensões tenham sido atualizadas
+            setTimeout(() => {
+                // Ajustar canvas para nova orientação
+                if (video.videoWidth) {
+                    const maxWidth = Math.min(video.videoWidth, currentSettings.resolution.width);
+                    const maxHeight = Math.min(video.videoHeight, currentSettings.resolution.height);
+                    
+                    const ratio = Math.min(maxWidth / video.videoWidth, maxHeight / video.videoHeight);
+                    
+                    canvas.width = video.videoWidth * ratio;
+                    canvas.height = video.videoHeight * ratio;
+                }
+            }, 300);
         });
         
         // Inicializar a aplicação
